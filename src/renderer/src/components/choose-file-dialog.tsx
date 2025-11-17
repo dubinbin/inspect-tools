@@ -46,8 +46,18 @@ export default function ChooseFileDialog(): React.JSX.Element {
             <button className="btn btn-base btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
             <h3 className="font-bold text-lg">Choose File</h3>
-            <p className="py-4">Please choose the task file or type the path to the file.</p>
-            <div className="flex flex-row gap-2"> </div>
+            <p className="py-4">
+              Please choose the task file. The file browser will open in the task path.
+            </p>
+
+            {localStorage.getItem('taskPath') && (
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                <p className="text-sm font-semibold text-blue-700">Task Path:</p>
+                <p className="text-xs text-blue-600 break-all">
+                  {localStorage.getItem('taskPath')}
+                </p>
+              </div>
+            )}
 
             <button
               className="btn btn-base bg-white text-blue-500 w-full py-2 rounded shadow-md"
@@ -66,7 +76,6 @@ export default function ChooseFileDialog(): React.JSX.Element {
               className="input input-bordered w-full bg-gray-100"
               placeholder="File path will be filled automatically"
               value={filePath}
-              onChange={(e) => setFilePath(e.target.value)}
             />
             <div className="modal-action">
               <button

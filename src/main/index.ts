@@ -75,23 +75,51 @@ app.whenReady().then(() => {
 
   // IPC handler for selecting file
   ipcMain.handle('dialog:selectFile', async (_, defaultPath?: string) => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      defaultPath: defaultPath || undefined
-    })
+    console.log('=== File Selection Dialog ===')
+    console.log('Requested default path:', defaultPath)
+    console.log('Platform:', process.platform)
+
+    // On Linux, ensure the defaultPath exists and is absolute
+    let openPath = defaultPath
+    if (defaultPath) {
+      if (!existsSync(defaultPath)) {
+        console.warn(`Default path does not exist: ${defaultPath}`)
+        openPath = undefined
+      } else {
+        console.log(`Default path exists and will be used: ${openPath}`)
+      }
+    }
+
+    const dialogOptions = {
+      title: 'Select Task File',
+      properties: ['openFile'] as 'openFile'[],
+      defaultPath: openPath,
+      buttonLabel: 'Select File'
+    }
+
+    console.log('Opening file dialog with options:', dialogOptions)
+
+    const result = await dialog.showOpenDialog(dialogOptions)
 
     if (result.canceled) {
+      console.log('File selection was canceled')
       return { canceled: true, path: null }
     } else {
       const selectedPath = result.filePaths[0]
+      console.log('File selected:', selectedPath)
+
       // Validate that the selected file is within the task path
       if (defaultPath && !selectedPath.startsWith(defaultPath)) {
+        console.warn(
+          `Selected file is outside task path. Selected: ${selectedPath}, Expected prefix: ${defaultPath}`
+        )
         return {
           canceled: false,
           path: null,
           error: `Selected file must be within the task path: ${defaultPath}`
         }
       }
+      console.log('File selection validated successfully')
       return { canceled: false, path: selectedPath }
     }
   })
