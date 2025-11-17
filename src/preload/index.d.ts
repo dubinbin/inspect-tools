@@ -44,6 +44,8 @@ interface API {
   copyFileToDevice: (sourceFile: string, targetDevice: string) => Promise<CopyResult>
   onCopyProgress: (callback: (progress: number) => void) => void
   removeCopyProgressListener: () => void
+  minimizeWindow: () => void
+  closeWindow: () => void
 }
 
 declare global {

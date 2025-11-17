@@ -98,10 +98,10 @@ export default function ChooseFileDialog(): React.JSX.Element {
   return (
     <div className="relative">
       <button
-        className="btn btn-base bg-white text-blue-500 w-full py-2 rounded shadow-md"
+        className="btn btn-base bg-blue-500 text-white w-full py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors shadow-sm"
         onClick={openDialog}
       >
-        CHOOSE FILE
+        Choose File
       </button>
 
       <dialog id="my_modal_2" className="modal">
@@ -188,8 +188,8 @@ export default function ChooseFileDialog(): React.JSX.Element {
         </div>
       </dialog>
       {filePath ? (
-        <p className="text-sm text-white mt-4 absolute left-0 w-full wrap-break-word whitespace-normal">
-          File: {filePath}
+        <p className="text-xs text-gray-600 mt-3 break-all">
+          {filePath.split('/').pop()}
         </p>
       ) : null}
     </div>

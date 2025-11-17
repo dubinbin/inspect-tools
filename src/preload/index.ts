@@ -13,7 +13,9 @@ const api = {
   },
   removeCopyProgressListener: () => {
     ipcRenderer.removeAllListeners('file:copyProgress')
-  }
+  },
+  minimizeWindow: () => ipcRenderer.send('window:minimize'),
+  closeWindow: () => ipcRenderer.send('window:close')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
