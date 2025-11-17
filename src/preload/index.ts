@@ -4,7 +4,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
-  selectFile: (defaultPath?: string) => ipcRenderer.invoke('dialog:selectFile', defaultPath),
+  listFiles: (directoryPath: string) => ipcRenderer.invoke('file:listFiles', directoryPath),
   getExternalDevices: () => ipcRenderer.invoke('device:getExternalDevices'),
   copyFileToDevice: (sourceFile: string, targetDevice: string) =>
     ipcRenderer.invoke('file:copyToDevice', sourceFile, targetDevice),

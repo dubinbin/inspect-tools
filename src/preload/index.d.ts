@@ -6,6 +6,19 @@ interface DialogResult {
   error?: string
 }
 
+interface FileItem {
+  name: string
+  path: string
+  isDirectory: boolean
+  size?: number
+}
+
+interface ListFilesResult {
+  success: boolean
+  files: FileItem[]
+  error: string | null
+}
+
 interface Device {
   name: string
   path: string
@@ -26,7 +39,7 @@ interface CopyResult {
 
 interface API {
   selectDirectory: () => Promise<DialogResult>
-  selectFile: (defaultPath?: string) => Promise<DialogResult>
+  listFiles: (directoryPath: string) => Promise<ListFilesResult>
   getExternalDevices: () => Promise<DeviceResult>
   copyFileToDevice: (sourceFile: string, targetDevice: string) => Promise<CopyResult>
   onCopyProgress: (callback: (progress: number) => void) => void

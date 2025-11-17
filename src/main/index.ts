@@ -73,54 +73,55 @@ app.whenReady().then(() => {
     }
   })
 
-  // IPC handler for selecting file
-  ipcMain.handle('dialog:selectFile', async (_, defaultPath?: string) => {
-    console.log('=== File Selection Dialog ===')
-    console.log('Requested default path:', defaultPath)
-    console.log('Platform:', process.platform)
+  // IPC handler for listing files in a directory
+  ipcMain.handle('file:listFiles', async (_, directoryPath: string) => {
+    try {
+      console.log('Listing files in directory:', directoryPath)
 
-    // On Linux, ensure the defaultPath exists and is absolute
-    let openPath = defaultPath
-    if (defaultPath) {
-      if (!existsSync(defaultPath)) {
-        console.warn(`Default path does not exist: ${defaultPath}`)
-        openPath = undefined
-      } else {
-        console.log(`Default path exists and will be used: ${openPath}`)
+      if (!existsSync(directoryPath)) {
+        return { success: false, error: 'Directory does not exist', files: [] }
       }
-    }
 
-    const dialogOptions = {
-      title: 'Select Task File',
-      properties: ['openFile'] as 'openFile'[],
-      defaultPath: openPath,
-      buttonLabel: 'Select File'
-    }
+      const stats = statSync(directoryPath)
+      if (!stats.isDirectory()) {
+        return { success: false, error: 'Path is not a directory', files: [] }
+      }
 
-    console.log('Opening file dialog with options:', dialogOptions)
+      const entries = readdirSync(directoryPath, { withFileTypes: true })
+      const files: Array<{ name: string; path: string; isDirectory: boolean; size?: number }> = []
 
-    const result = await dialog.showOpenDialog(dialogOptions)
+      for (const entry of entries) {
+        // Skip hidden files
+        if (entry.name.startsWith('.')) {
+          continue
+        }
 
-    if (result.canceled) {
-      console.log('File selection was canceled')
-      return { canceled: true, path: null }
-    } else {
-      const selectedPath = result.filePaths[0]
-      console.log('File selected:', selectedPath)
-
-      // Validate that the selected file is within the task path
-      if (defaultPath && !selectedPath.startsWith(defaultPath)) {
-        console.warn(
-          `Selected file is outside task path. Selected: ${selectedPath}, Expected prefix: ${defaultPath}`
-        )
-        return {
-          canceled: false,
-          path: null,
-          error: `Selected file must be within the task path: ${defaultPath}`
+        const fullPath = join(directoryPath, entry.name)
+        try {
+          const itemStats = statSync(fullPath)
+          files.push({
+            name: entry.name,
+            path: fullPath,
+            isDirectory: entry.isDirectory(),
+            size: entry.isFile() ? itemStats.size : undefined
+          })
+        } catch (err) {
+          console.error(`Error reading ${entry.name}:`, err)
         }
       }
-      console.log('File selection validated successfully')
-      return { canceled: false, path: selectedPath }
+
+      // Sort: directories first, then files, both alphabetically
+      files.sort((a, b) => {
+        if (a.isDirectory && !b.isDirectory) return -1
+        if (!a.isDirectory && b.isDirectory) return 1
+        return a.name.localeCompare(b.name)
+      })
+
+      console.log(`Found ${files.length} items in ${directoryPath}`)
+      return { success: true, files, error: null }
+    } catch (error) {
+      console.error('Error listing files:', error)
+      return { success: false, error: (error as Error).message, files: [] }
     }
   })
 
